@@ -1,10 +1,14 @@
 from pathlib import Path
 
+import cv2
+import numpy as np
+import supervision as sv
 import torch
 from mmengine.config import Config
 from mmengine.dataset import Compose
 from mmengine.runner import Runner
 from mmengine.runner.amp import autocast
+from PIL import Image
 from torchvision.ops import nms
 
 WORK_DIR = Path(__file__).parent.resolve()
@@ -57,3 +61,26 @@ pred_instances = pred_instances.cpu().numpy()
 
 print(pred_instances)
 print("\x1b[1;32mSuccessfully run image demo!\x1b[0m")
+
+#+begin visualize for debug
+detections = sv.Detections(
+    xyxy=pred_instances["bboxes"],
+    class_id=pred_instances["labels"],
+    confidence=pred_instances["scores"],
+)
+labels = [
+    f"{texts[class_id][0]} {confidence:0.2f}"
+    for class_id, confidence in zip(detections.class_id, detections.confidence)
+]
+img = np.array(Image.open(IMG_PATH))
+img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+img = sv.BoundingBoxAnnotator().annotate(img, detections)
+img = sv.LabelAnnotator(text_color=sv.Color.BLACK).annotate(
+    img, detections, labels=labels
+)
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+img = Image.fromarray(img)
+with open(IMG_PATH.with_suffix(".labeled.jpg"), "wb") as fd:
+    img.save(fd)
+print("\x1b[1;32mSuccessfully save demo image!\x1b[0m")
+#+end
