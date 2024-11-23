@@ -80,7 +80,17 @@ img = sv.LabelAnnotator(text_color=sv.Color.BLACK).annotate(
 )
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 img = Image.fromarray(img)
-with open(IMG_PATH.with_suffix(".labeled.jpg"), "wb") as fd:
-    img.save(fd)
-print("\x1b[1;32mSuccessfully save demo image!\x1b[0m")
+# with open(IMG_PATH.with_suffix(".labeled.jpg"), "wb") as fd:
+#     img.save(fd)
+# print("\x1b[1;32mSuccessfully save demo image!\x1b[0m")
 #+end
+
+
+def mask_from_bbox(xyxy: np.ndarray, img: np.ndarray) -> np.ndarray:
+    xyxy = np.round(xyxy).astype(np.int32)
+    width = xyxy[2] - xyxy[0]
+    height = xyxy[3] - xyxy[1]
+    mask = np.zeros_like(img)
+    mask[xyxy[1] :, xyxy[0] :][:height, :width] = 1
+
+    return mask
