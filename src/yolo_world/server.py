@@ -10,7 +10,8 @@ from mmengine.runner.amp import autocast
 from PIL import Image
 from torchvision.ops import nms
 
-from .init import init_runner
+from src.communication.messages import YoloMessage
+from src.yolo_world.init import init_runner
 
 
 class Server:
@@ -53,7 +54,7 @@ class Server:
         except KeyboardInterrupt:
             print("Abort due to keyboard interrupt.")  # TODO: use logger
 
-    def _wait_for_msg(self) -> dict[str, str]:  # TODO: return a dataclass
+    def _wait_for_msg(self) -> YoloMessage:
         while True:
             if self.msg_file.stat().st_mtime_ns > self._time_stamp:
                 break
@@ -61,7 +62,7 @@ class Server:
                 time.sleep(0.1)
 
         with open(self.msg_file, "r") as fd:
-            return json.load(fd)
+            return YoloMessage.from_dict(json.load(fd))
 
     def _inference(self, img_path: Path, labels: list[str]) -> np.ndarray:
         data_info = self.runner.pipeline(
