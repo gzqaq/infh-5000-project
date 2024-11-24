@@ -1,3 +1,4 @@
+import functools as ft
 from pathlib import Path
 
 import cv2
@@ -94,3 +95,7 @@ def mask_from_bbox(xyxy: np.ndarray, img: np.ndarray) -> np.ndarray:
     mask[xyxy[1] :, xyxy[0] :][:height, :width] = 1
 
     return mask
+
+
+def combine_masks(masks: list[np.ndarray]) -> np.ndarray:
+    return ft.reduce(np.logical_or, masks, np.zeros_like(masks[0]))
