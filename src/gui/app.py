@@ -47,6 +47,8 @@ class App(QWidget):
         self.original_frame.setFrameShape(QFrame.Box)
         self.original_image_label = QLabel("Original Image")
         self.original_image_label.setAlignment(Qt.AlignCenter)
+        self.original_frame.setFrameShadow(QFrame.Sunken)
+        self.original_frame.setStyleSheet("background-color: lightgray;")
 
         self.processed_frame = QFrame()
         self.processed_frame.setFrameShape(QFrame.Box)
