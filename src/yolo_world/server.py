@@ -61,11 +61,13 @@ class Server:
                     f"with labels {','.join(msg.labels)}."
                 )
                 boxes = self._inference(msg.img_path, msg.labels)
-                self._logger.info(f"Identifies {len(boxes)} objects.")
+                self._logger.info(f"Detected {len(boxes)} objects.")
 
                 # create mask and save masked image
                 original_img = Image.open(msg.img_path)
                 masks = [mask_from_box_coordinates(box, original_img) for box in boxes]
+                if len(masks) == 0:
+                    masks.append(np.ones_like(original_img))
                 mask = combine_masks(masks)
                 masked_img = original_img * mask
                 self._logger.info("Masks successfully applied.")
