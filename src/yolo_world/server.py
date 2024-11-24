@@ -2,7 +2,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from tempfile import mkstemp
+from tempfile import gettempdir
 
 import numpy as np
 import torch
@@ -40,7 +40,9 @@ class Server:
         self.score_thres = score_thres
         self.max_num_boxes = max_num_boxes
 
-        self.msg_file = Path(mkstemp(prefix="yolo-world-server-")[1])
+        self.msg_file = Path(gettempdir()) / "yolo-world-server.msg"
+        if not self.msg_file.exists():
+            self.msg_file.touch()
         self._logger.info(f"Use {self.msg_file} to communicate.")
 
         self._timestamp: int
@@ -89,7 +91,7 @@ class Server:
             self._logger.warning("Abort due to keyboard interrupt.")  # TODO: use logger
 
     def _setup_logger(self) -> None:
-        log_path = Path(mkstemp(suffix=".log", prefix="yolo-world-server-")[1])
+        log_path = Path(gettempdir()) / "yolo-world-server.log"
         logger = logging.getLogger("yolo-world")
         logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
