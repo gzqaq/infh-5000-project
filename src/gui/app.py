@@ -1,6 +1,10 @@
+import json
 import sys
+import time
+from pathlib import Path
 
 import cv2
+import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QImage, QPixmap
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QFrame, QGridLayout,
@@ -9,9 +13,11 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QFrame, QGridLayout,
 
 
 class App(QWidget):
-    def __init__(self):
+    def __init__(self, msg_file: Path):
         super().__init__()
         self._init_ui()
+
+        self.msg_file = msg_file
 
     def _init_ui(self):
         self.setWindowTitle("A Fun App")
@@ -100,22 +106,45 @@ class App(QWidget):
         user_text = self.text_input.toPlainText()
 
         ############ Call the function to process the image and pass user text  ################
-        processed_image = self.convert_to_black_and_white(self.image_path, user_text)
+        # processed_image = self.convert_to_black_and_white(self.image_path, user_text)
+        processed_image = self.communicate_with_yolo_world(self.image_path, user_text)
 
         # Convert the processed image to QPixmap and display it
-        height, width = processed_image.shape
-        bytes_per_line = width
+        height, width, channels = processed_image.shape
+        bytes_per_line = width * channels
         q_image = QImage(
             processed_image.data,
             width,
             height,
             bytes_per_line,
-            QImage.Format_Grayscale8,
+            QImage.Format_RGB888,
         )
         pixmap = QPixmap.fromImage(q_image)
         self.processed_image_label.setPixmap(
             pixmap.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
+
+    def communicate_with_yolo_world(self, img_path: str, labels: str) -> np.ndarray:
+        path_to_orig = Path(img_path).resolve()
+        path_to_res = path_to_orig.with_suffix(f".res{path_to_orig.suffix}")
+
+        if not path_to_res.exists():
+            path_to_res.touch()
+        timestamp = path_to_res.stat().st_mtime_ns
+
+        msg = {
+            "img_path": f"{path_to_orig}",
+            "labels": labels,
+            "tgt_path": f"{path_to_res}",
+        }
+        with open(self.msg_file, "w") as fd:
+            json.dump(msg, fd)
+
+        while path_to_res.stat().st_mtime_ns == timestamp:
+            time.sleep(0.1)
+
+        img_bgr = cv2.imread(path_to_res)
+        return cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
 
     def convert_to_black_and_white(self, image_path, user_text):
         # Process the image using OpenCV
@@ -129,6 +158,6 @@ class App(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = App()
+    window = App(Path(sys.argv[1]).resolve())
     window.show()
     sys.exit(app.exec_())
