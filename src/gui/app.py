@@ -51,7 +51,7 @@ class App(QWidget):
 
         self.text_input = QTextEdit()
         self.text_input.setPlaceholderText("Enter some text here...")
-        self.text_input.setFixedWidth(self.upload_button.sizeHint().width() * 1.2)
+        self.text_input.setFixedWidth(int(self.upload_button.sizeHint().width() * 1.2))
         self.text_input.setFont(font)
 
         # Frames for displaying images with square size
