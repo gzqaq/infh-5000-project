@@ -32,8 +32,8 @@ class Server:
         self.nms_thres = nms_thres
         self.score_thres = score_thres
         self.max_num_boxes = max_num_boxes
-        self.msg_file = Path(mkstemp(prefix="yolo-world-server")[1])
-        self._time_stamp = self.msg_file.stat().st_mtime_ns
+        self.msg_file = Path(mkstemp(prefix="yolo-world-server-")[1])
+        self._update_timestamp()
 
     def run(self) -> None:
         try:
@@ -65,6 +65,9 @@ class Server:
         except KeyboardInterrupt:
             print("Abort due to keyboard interrupt.")  # TODO: use logger
 
+    def _update_timestamp(self) -> None:
+        self._time_stamp = self.msg_file.stat().st_mtime_ns
+
     def _wait_for_msg(self) -> YoloMessage:
         while True:
             if self.msg_file.stat().st_mtime_ns > self._time_stamp:
@@ -72,12 +75,14 @@ class Server:
             else:
                 time.sleep(0.1)
 
+        self._update_timestamp()
         with open(self.msg_file, "r") as fd:
             return YoloMessage.from_dict(json.load(fd))
 
     def _inference(self, img_path: Path, labels: list[str]) -> np.ndarray:
+        texts = [[label] for label in labels]
         data_info = self.runner.pipeline(
-            {"img_id": 0, "img_path": img_path, "texts": labels}
+            {"img_id": 0, "img_path": img_path, "texts": texts}
         )
         data_batch = {
             "inputs": data_info["inputs"][None],
