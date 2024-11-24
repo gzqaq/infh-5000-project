@@ -12,6 +12,7 @@ from torchvision.ops import nms
 
 from src.communication.messages import YoloMessage
 from src.yolo_world.init import init_runner
+from src.yolo_world.utils import combine_masks, mask_from_box_coordinates
 
 
 class Server:
@@ -38,18 +39,28 @@ class Server:
         try:
             while True:
                 msg = self._wait_for_msg()
+                if msg.tgt_path is None:
+                    save_path = msg.img_path.with_suffix(f".res{msg.img_path.suffix}")
+                else:
+                    save_path = msg.tgt_path
 
-                # format input
-
-                # inference
+                boxes = self._inference(msg.img_path, msg.labels)
 
                 # create mask and save masked image
+                original_img = Image.open(msg.img_path)
+                masks = [mask_from_box_coordinates(box, original_img) for box in boxes]
+                mask = combine_masks(masks)
+                masked_img = original_img * mask
 
                 # call xmas hat
 
                 # overlay hatted image to original one
+                overlayed_img = masked_img
 
                 # save processed image
+                res_img = Image.fromarray(overlayed_img)
+                with open(save_path, "wb") as fd:
+                    res_img.save(fd)
 
         except KeyboardInterrupt:
             print("Abort due to keyboard interrupt.")  # TODO: use logger
