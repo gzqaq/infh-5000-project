@@ -80,7 +80,7 @@ class Server:
                 self._logger.info("Christmas hats successfully added.")
 
                 # overlay hatted image to original one
-                overlayed_img = masked_img
+                overlayed_img = np.where(masked_img > 0, masked_img, original_img)
                 self._logger.info("Original image successfully overlayed.")
 
                 # save processed image
