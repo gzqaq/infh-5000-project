@@ -78,7 +78,7 @@ class Server:
                     Image.fromarray(masked_img).save(fd)
 
                 # call xmas hat
-                masked_img = wear_hats(masked_img)
+                masked_img = wear_hats(masked_img, ",".join(msg.labels))
                 self._logger.info("Christmas hats successfully added.")
 
                 # overlay hatted image to original one
