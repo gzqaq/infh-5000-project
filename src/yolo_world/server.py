@@ -12,6 +12,7 @@ from PIL import Image
 from torchvision.ops import nms
 
 from src.communication.messages import YoloMessage
+from src.xmas_hat.process import wear_hats
 from src.yolo_world.init import init_runner
 from src.yolo_world.utils import combine_masks, mask_from_box_coordinates
 
@@ -75,6 +76,7 @@ class Server:
                 self._logger.info("Masks successfully applied.")
 
                 # call xmas hat
+                masked_img = wear_hats(masked_img)
                 self._logger.info("Christmas hats successfully added.")
 
                 # overlay hatted image to original one
