@@ -74,6 +74,8 @@ class Server:
                 mask = combine_masks(masks)
                 masked_img = original_img * mask
                 self._logger.info("Masks successfully applied.")
+                with open(save_path.with_stem("masked"), "wb") as fd:
+                    Image.fromarray(masked_img).save(fd)
 
                 # call xmas hat
                 masked_img = wear_hats(masked_img)
