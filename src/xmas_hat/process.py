@@ -10,12 +10,15 @@ from .wear_hat import wear_hat
 def wear_hats(img: np.ndarray, labels: str = "") -> np.ndarray:
     hats = read_hats()
 
-    if "cat" in labels:
-        configs = read_configs(["real", "anime"])
+    if "anime" in labels:
+        modes = ["anime"]
     else:
-        configs = read_configs()
+        modes = ["real"]
 
-    for config in configs:
+    if "cat" in labels:
+        modes.append("cat")
+
+    for config in read_configs(modes):
         for face in detect_face(img, config):
             hat = random.choice(hats)
             img = wear_hat(img, face, hat)
