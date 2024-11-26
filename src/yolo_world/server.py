@@ -80,6 +80,8 @@ class Server:
                 # call xmas hat
                 masked_img = wear_hats(masked_img, ",".join(msg.labels))
                 self._logger.info("Christmas hats successfully added.")
+                with open(save_path.with_stem("masked-with-hats"), "wb") as fd:
+                    Image.fromarray(masked_img).save(fd)
 
                 # overlay hatted image to original one
                 overlayed_img = np.where(masked_img > 0, masked_img, original_img)
