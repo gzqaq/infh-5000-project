@@ -1,0 +1,24 @@
+#+title: Character-Specific Image Editing System based on Language Models
+
+** Setup
+First follow [[https://github.com/AILab-CVC/YOLO-World#1-installation][the installation guide of YOLO-World]] to set up a Python environment. Then install PyQt5
+within this environment by executing the following command:
+#+begin_src shell
+pip install PyQt5
+#+end_src
+
+** Usage
+First run the backend server:
+#+begin_src shell
+python -m src.yolo_world
+#+end_src
+Then start the GUI by running the following command in a different terminal:
+#+begin_src shell
+python src/gui/app.py <path_to_server_msg>
+#+end_src
+where ~<path_to_server_msg>~ is the file by which the front end communicates with the server. This
+path can be found in the output log of the previous command, which will be displayed in the
+console. On a Linux system, it should default to ~/tmp/yolo-world-server.msg~.
+
+** Demo
+We provide a sample in ~assets/demo/~.
